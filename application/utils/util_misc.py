@@ -4,7 +4,7 @@ import os
 
 def check_executable(path: Path):
     if not path.exists():
-        raise FileNotFoundError(f"{path} does not exist")
+        raise FileNotFoundError(f"{path} does not exist. Make sure you have this binary available!")
 
     if not os.access(path, os.X_OK):
         raise PermissionError(
