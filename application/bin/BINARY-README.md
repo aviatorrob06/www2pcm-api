@@ -5,3 +5,4 @@ Find the downloads for these here, and put them in this folder:
 - https://ffmpeg.org/
 
 MAKE SURE THE CONFIG FILE HAS THE CORRECT PATHS!
+ENSURE THE BINARIES HAVE EXECUTABLE PERMISSION AS WELL!
