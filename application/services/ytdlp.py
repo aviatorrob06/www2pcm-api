@@ -2,6 +2,8 @@ from application.config import *
 import subprocess
 import json
 import logging
+from application.config import YTDLP_PATH
+from application.utils.source_enum import SourceType
 from application.utils.cachehelper import read_metadata, save_metadata
 
 configLogger()
@@ -35,7 +37,7 @@ def get_metadata(video_id):
         logger.debug("Subprocess success. Parsing results")
         data = json.loads(result.stdout)
 
-        save_metadata(video_id, data)
+        save_metadata(SourceType.YOUTUBE, video_id, data)
 
         return data
 

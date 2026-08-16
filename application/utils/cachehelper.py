@@ -2,6 +2,7 @@ import json
 import os
 import time
 import logging
+from application.utils.source_enum import SourceType
 from pathlib import Path
 from application.config import BASE_DIR, configLogger, CACHE_PATH, CACHE_LIMIT
 
@@ -43,10 +44,10 @@ def lru_sweep(bytes_needed: int):
         if CACHE_LIMIT - total_size >= bytes_needed:
             break
 
-def save_metadata(video_id: str, metadata: dict):
-    logger.debug(f"Saving metadata for {video_id}")
+def save_metadata(source: SourceType, id: str, metadata: dict):
+    logger.debug(f"Saving metadata for source type {source}, id {id}")
 
-    path = CACHE_PATH / "metadata" / f"{video_id}.json"
+    path = CACHE_PATH / source.value / "metadata" / f"{id}.json"
 
     lru_sweep(
         len(
@@ -59,9 +60,9 @@ def save_metadata(video_id: str, metadata: dict):
 
     mark_used(path)
 
-def read_metadata(video_id: str):
-    logger.debug(f"Attempting to read metadata for {video_id}")
-    path = CACHE_PATH / "metadata" / f"{video_id}.json"
+def read_metadata(source: SourceType, id: str):
+    logger.debug(f"Attempting to read metadata for source {source}, id {id}")
+    path = CACHE_PATH / source.value / "metadata" / f"{id}.json"
 
     if not path.exists():
         raise FileNotFoundError("Not cached yet")
@@ -69,9 +70,9 @@ def read_metadata(video_id: str):
         mark_used(path)
         return json.load(file)
 
-def save_pcm(video_id: str, pcm_data):
-    logger.debug(f"Attempting to save PCM file in cache for {video_id}")
-    path = CACHE_PATH / "pcm" / f"{video_id}.pcm"
+def save_pcm(source: SourceType, id: str, pcm_data):
+    logger.debug(f"Attempting to save PCM file in cache for source {source}, id {id}")
+    path = CACHE_PATH / source.value / "pcm" / f"{id}.pcm"
 
     lru_sweep(len(pcm_data))
 
@@ -80,8 +81,8 @@ def save_pcm(video_id: str, pcm_data):
 
     mark_used(path)
 
-def read_pcm(video_id: str):
-    path = CACHE_PATH / "pcm" / f"{video_id}.pcm"
+def read_pcm(source: SourceType, id: str):
+    path = CACHE_PATH / source.value / "pcm" / f"{id}.pcm"
 
     if not path.exists():
         raise FileNotFoundError("Not cached yet")
@@ -89,3 +90,34 @@ def read_pcm(video_id: str):
     with open(path, "rb") as file:
         mark_used(path)
         return file.read()
+
+def save_ytlink(source: SourceType, track_id: str, video_id: str):
+    logger.debug(f"Attempting to save ytlink for source {source}, id {track_id}")
+    if source.value == SourceType.SPOTIFY.value:
+
+        path = CACHE_PATH / source.value / "yt-links" / f"{track_id}.json"
+
+        data = {"video_id": video_id}
+
+        lru_sweep(
+            len(
+                json.dumps(data).encode("utf-8")
+            )
+        )
+
+        with open(path, "w") as file:
+            mark_used(path)
+            json.dump(data, file, indent=4)
+
+def get_ytlink(source: SourceType, track_id: str):
+    logger.debug(f"Attempting to read ytlink for source {source}, id {track_id}")
+    if source.value == SourceType.SPOTIFY.value:
+        path = CACHE_PATH / source.value / "yt-links" / f"{track_id}.json"
+
+        if not path.exists():
+            raise FileNotFoundError("Not cached yet")
+
+        with open(path, "r") as file:
+            mark_used(path)
+            data = json.load(file)
+            return data["video_id"]

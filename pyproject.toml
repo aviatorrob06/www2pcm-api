@@ -1,0 +1,27 @@
+[project]
+name = "www2pcm-api"
+version = "0.1.0"
+description = "REST styled web API made utilizing FastAPI that returns raw PCM data from select streaming services"
+requires-python = ">=3.12"
+dependencies = [
+    "fastapi",
+    "uvicorn[standard]",
+    "yt-dlp",
+    "spotdl",
+    "deno",
+    "gunicorn"
+]
+readme = "README.md"
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[tool.uv]
+package = false
