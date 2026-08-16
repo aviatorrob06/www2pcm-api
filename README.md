@@ -7,7 +7,9 @@ It is a REST-style API made in Python utilizing FastAPI with the intention of pr
 ### What services are currently supported?
 - YouTube ✅
 - Spotify ❌
-- Soundcloud ❌
+- SoundCloud ❌
+- Bandcamp ❌
+- Direct URLs ❌
 
 ### How does it work?
 As for sourcing from YouTube, this API wraps commandline utility YT-DLP to handle the retrieving and parsing of YouTube data, and then FFMPEG is also wrapped in to format the audio properly.
