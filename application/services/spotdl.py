@@ -46,5 +46,3 @@ def get_yt_id(id: str):
         raise RuntimeError("spotDL did not return a URL")
 
     return parse_qs(urlparse(youtube_url).query)["v"][0]
-
-print(get_yt_id("683b4ikwa62JevCjwrmfg6?si=8647f0366cea4acd"))

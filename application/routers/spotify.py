@@ -23,25 +23,18 @@ router = APIRouter(
 @router.get("/pcm")
 async def get_spotify_pcm(track_id: str):
         logger.debug(f"Attempting to get and return PCM data for {track_id}. Checking ytlink cache")
-        path = CACHE_PATH / "spotify" / "yt-links" / f"{track_id}.json"
-
-        if path.exists():
-            logger.debug("Found ytlink cache. Checking for cached PCM data.")
-
-            with open(path, "r") as file:
-                mark_used(path)
-                data = json.load(file)
-                video_id = data["video_id"]
-                try:
-                    pcm = cachehelper.read_pcm(SourceType.YOUTUBE, video_id)
-                    return Response(
-                        content=pcm,
-                        media_type="application/octet-stream"
-                    )
-                except FileNotFoundError:
-                    logger.debug("Did NOT find cached PCM data. Calling YouTube PCM endpoint.")
-                    return await youtube.get_pcm(video_id)
-        else:
+        try:
+            video_id = cachehelper.get_ytlink(SourceType.SPOTIFY, track_id)
+            try:
+                pcm = cachehelper.read_pcm(SourceType.YOUTUBE, video_id)
+                return Response(
+                    content=pcm,
+                    media_type="application/octet-stream"
+                )
+            except FileNotFoundError:
+                logger.debug("Did NOT find cached PCM data. Calling YouTube PCM endpoint.")
+                return await youtube.get_pcm(video_id)
+        except FileNotFoundError:
             logger.debug("Did not find ytlink cache, running SpotDL")
             try:
                 video_id = application.services.spotdl.get_yt_id(track_id)

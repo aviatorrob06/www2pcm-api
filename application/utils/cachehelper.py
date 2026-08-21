@@ -47,6 +47,9 @@ def lru_sweep(bytes_needed: int):
 def save_metadata(source: SourceType, id: str, metadata: dict):
     logger.debug(f"Saving metadata for source type {source}, id {id}")
 
+    if source == SourceType.SOUNDCLOUD:
+        id = id.replace("/", "_")
+
     path = CACHE_PATH / source.value / "metadata" / f"{id}.json"
 
     lru_sweep(
@@ -62,6 +65,10 @@ def save_metadata(source: SourceType, id: str, metadata: dict):
 
 def read_metadata(source: SourceType, id: str):
     logger.debug(f"Attempting to read metadata for source {source}, id {id}")
+
+    if source == SourceType.SOUNDCLOUD:
+        id = id.replace("/", "_")
+
     path = CACHE_PATH / source.value / "metadata" / f"{id}.json"
 
     if not path.exists():
@@ -72,6 +79,10 @@ def read_metadata(source: SourceType, id: str):
 
 def save_pcm(source: SourceType, id: str, pcm_data):
     logger.debug(f"Attempting to save PCM file in cache for source {source}, id {id}")
+
+    if source == SourceType.SOUNDCLOUD:
+        id = id.replace("/", "_")
+
     path = CACHE_PATH / source.value / "pcm" / f"{id}.pcm"
 
     lru_sweep(len(pcm_data))
@@ -82,6 +93,9 @@ def save_pcm(source: SourceType, id: str, pcm_data):
     mark_used(path)
 
 def read_pcm(source: SourceType, id: str):
+    if source == SourceType.SOUNDCLOUD:
+        id = id.replace("/", "_")
+
     path = CACHE_PATH / source.value / "pcm" / f"{id}.pcm"
 
     if not path.exists():

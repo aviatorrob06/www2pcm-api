@@ -1,34 +1,38 @@
+import json
+
+from fastapi import APIRouter, HTTPException
+from starlette.responses import Response, JSONResponse
+
+import application.services.spotdl
+from application.config import *
 import logging
 
-from fastapi import APIRouter, HTTPException, Response
-from starlette.responses import JSONResponse
-
-from application.config import configLogger
-from application.services import ffmpeg, ytdlp
+from application.routers import youtube
+from application.services import ytdlp
+from application.services import ffmpeg
 from application.utils import cachehelper
-from application.utils.cachehelper import save_pcm
 from application.utils.source_enum import SourceType
 
 configLogger()
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    prefix="/youtube",
-    tags=["YouTube"]
+    prefix="/soundcloud",
+    tags=["Soundcloud"]
 )
 
 @router.get("/pcm")
-async def get_pcm(video_id: str):
+async def getPcm(resource_path: str):
+    logger.debug(f"Attempting to get and return PCM data for soundcloud resource '{resource_path}' Checking cache first")
     try:
-        logger.debug(f"Attempting to get and return PCM data for {video_id}. Checking cache")
-        pcm = cachehelper.read_pcm(SourceType.YOUTUBE, video_id)
+        cacheFile = cachehelper.read_pcm(SourceType.SOUNDCLOUD, resource_path)
         return Response(
-            content=pcm,
+            content=cacheFile,
             media_type="application/octet-stream"
         )
     except FileNotFoundError:
-        logger.debug("Did not find in cache. Requesting audio stream from YT-DLP, then feeding into FFMPEG.")
-        ytdlp_process = ytdlp.get_audio_stream(SourceType.YOUTUBE, video_id)
+        logger.debug("Did not find PCM data for requested soundcloud source. Invoking YTDLP to cache and return PCM.")
+        ytdlp_process = ytdlp.get_audio_stream(SourceType.SOUNDCLOUD, resource_path)
 
         pcm, ffmpeg_errors, ffmpeg_returncode = ffmpeg.convertToPcm(
             ytdlp_process.stdout
@@ -59,7 +63,7 @@ async def get_pcm(video_id: str):
                 }
             )
 
-        save_pcm(SourceType.YOUTUBE, video_id, pcm)
+        cachehelper.save_pcm(SourceType.SOUNDCLOUD, resource_path, pcm)
 
         return Response(
             content=pcm,
@@ -67,15 +71,15 @@ async def get_pcm(video_id: str):
         )
 
 @router.get("/metadata")
-async def get_metadata(video_id: str):
+async def get_metadata(resource_path: str):
     try:
-        logger.debug(f"Attempting to get metadata for {video_id}; checking cache")
-        metadata = cachehelper.read_metadata(SourceType.YOUTUBE, video_id)
+        logger.debug(f"Attempting to get metadata for {resource_path}; checking cache")
+        metadata = cachehelper.read_metadata(SourceType.SOUNDCLOUD, resource_path)
         logger.debug(f"Found metadata: {metadata}")
         return metadata
     except FileNotFoundError:
         logger.debug("Did not find metadata in cache. Calling YTDLP.")
-        content = ytdlp.get_metadata(SourceType.YOUTUBE, video_id)
+        content = ytdlp.get_metadata(SourceType.SOUNDCLOUD, resource_path)
 
         return JSONResponse(
             content=content
