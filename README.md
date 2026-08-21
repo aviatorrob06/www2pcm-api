@@ -6,8 +6,8 @@ It is a REST-style API made in Python utilizing FastAPI with the intention of pr
 
 ### What services are currently supported?
 - YouTube ✅
-- Spotify ❌
-- SoundCloud ❌
+- Spotify ✅
+- SoundCloud ✅
 - Bandcamp ❌
 - Direct URLs ❌
 
@@ -31,4 +31,5 @@ Used as ASGI server
 Used for YouTube sourcing
 ### 4. [FFMPEG](https://ffmpeg.org/)
 Used for audio data conversion/formatting
-
+### 5. [SpotDL](https://github.com/spotDL/spotify-downloader)
+Used for finding most similar YouTube video to provided Spotify track
