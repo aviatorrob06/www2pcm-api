@@ -1,3 +1,5 @@
+from pymongo.common import validate_is_document_type
+
 from application.config import *
 import subprocess
 import json
@@ -11,11 +13,17 @@ logger = logging.getLogger(__name__)
 
 def get_metadata(sourceType: SourceType, video_id:str):
     urlbase = ""
+    artistId = ""
     match sourceType:
         case SourceType.YOUTUBE:
             urlbase = "https://www.youtube.com/watch?v="
         case SourceType.SOUNDCLOUD:
             urlbase = "https://soundcloud.com/"
+        case SourceType.BANDCAMP:
+            splitStr = video_id.split("/")
+            artistId = splitStr[0]
+            video_id = splitStr[1]
+            urlbase = f"https://{artistId}.bandcamp.com/track/"
     command = [
         YTDLP_PATH,
         "--dump-json",
@@ -35,6 +43,9 @@ def get_metadata(sourceType: SourceType, video_id:str):
     logger.debug("Subprocess success. Parsing results")
     data = json.loads(result.stdout)
 
+    if sourceType == SourceType.BANDCAMP:
+        video_id = artistId + "/" + video_id
+
     save_metadata(sourceType, video_id, data)
 
     return data
@@ -48,6 +59,12 @@ def get_audio_stream(sourceType: SourceType, video_id: str):
             urlbase = "https://www.youtube.com/watch?v="
         case SourceType.SOUNDCLOUD:
             urlbase = "https://soundcloud.com/"
+        case SourceType.BANDCAMP:
+            splitStr = video_id.split("/")
+            artistId = splitStr[0]
+            video_id = splitStr[1]
+            urlbase = f"https://{artistId}.bandcamp.com/track/"
+
     command = [
         YTDLP_PATH,
         "-f", "bestaudio",

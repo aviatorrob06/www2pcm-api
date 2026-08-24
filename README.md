@@ -8,11 +8,11 @@ It is a REST-style API made in Python utilizing FastAPI with the intention of pr
 - YouTube ✅
 - Spotify ✅
 - SoundCloud ✅
-- Bandcamp ❌
+- Bandcamp ✅
 - Direct URLs ❌
 
 ### How does it work?
-As for sourcing from YouTube, this API wraps commandline utility YT-DLP to handle the retrieving and parsing of YouTube data, and then FFMPEG is also wrapped in to format the audio properly.
+This API effectively serves as a wrapper for YT-DLP. The majority of the services supported get their support directly from YT-DLP, with the exception of Spotify, which uses SpotDL AND YT-DLP.
 
 ### What are the audio specifications this exports?
 This is customizable in the config file, but by default:
