@@ -9,7 +9,7 @@ It is a REST-style API made in Python utilizing FastAPI with the intention of pr
 - Spotify ✅
 - SoundCloud ✅
 - Bandcamp ✅
-- Direct URLs ❌
+- Direct URLs ✅ (only if enabled in config)
 
 ### How does it work?
 This API effectively serves as a wrapper for YT-DLP. The majority of the services supported get their support directly from YT-DLP, with the exception of Spotify, which uses SpotDL AND YT-DLP.
@@ -31,6 +31,8 @@ Installation script and instructions coming soon!
 - /youtube
 - /spotify
 - /soundcloud
+- /bandcamp
+- /direct
 ```
 ### Each endpoint has two methods:
 ```

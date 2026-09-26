@@ -1,8 +1,10 @@
 from pathlib import Path
 from application import config
 import os
+from pathlib import Path
 
-def check_executable(path: Path):
+def check_executable(string: str):
+    path = Path(string)
     if not path.exists():
         raise FileNotFoundError(f"{path} does not exist. Make sure you have this binary available!")
 

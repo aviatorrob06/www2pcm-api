@@ -2,6 +2,7 @@ import json
 import os
 import time
 import logging
+import hashlib
 from application.utils.source_enum import SourceType
 from pathlib import Path
 from application.config import BASE_DIR, configLogger, CACHE_PATH, CACHE_LIMIT
@@ -135,3 +136,7 @@ def get_ytlink(source: SourceType, track_id: str):
             mark_used(path)
             data = json.load(file)
             return data["video_id"]
+
+def hash_name(string):
+    name = hashlib.sha256(string.encode("utf-8")).hexdigest()
+    return name

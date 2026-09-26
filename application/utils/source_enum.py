@@ -4,4 +4,5 @@ class SourceType(Enum):
     YOUTUBE = "youtube"
     SPOTIFY = "spotify"
     SOUNDCLOUD = "soundcloud"
-    BANDCAMP = "bandcamp"
+    BANDCAMP = ("bandcamp")
+    DIRECT = ("direct")

@@ -1,12 +1,11 @@
 [project]
 name = "www2pcm-api"
-version = "0.2.0"
+version = "1.0.0"
 description = "REST styled web API made utilizing FastAPI that returns raw PCM data from select streaming services"
 requires-python = ">=3.12"
 dependencies = [
     "fastapi",
     "uvicorn[standard]",
-    "yt-dlp",
     "spotdl",
     "deno",
     "gunicorn"
