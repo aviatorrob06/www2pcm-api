@@ -126,3 +126,93 @@ async def getPcm(url: str):
                     "error": str(e)
                 }
             )
+
+@router.get("/metadata")
+async def getMetadata(url: str):
+    if not application.config.DIRECT_URL_ALLOWED:
+        raise HTTPException(
+            status_code=403,
+            detail={
+                "service": "direct",
+                "error": "Direct URL processing not enabled in WWW2PCM-API config!"
+            }
+        )
+    logger.debug(f"Attempting to get and return PCM data for direct URL '{url}' Checking cache first")
+    url = url_normalizer.normalize(url)
+    file_name = cachehelper.hash_name(url)
+    try:
+        cacheFile = cachehelper.read_metadata(SourceType.DIRECT, file_name)
+        return cacheFile
+    except FileNotFoundError:
+        logger.debug("Did not find metadata for requested direct URL. Sending HTTP request to it")
+
+        try:
+            response = urlopen(url)
+
+            contentType = response.headers.get("Content-Type")
+
+            if (contentType and contentType.startswith("audio/")) or (
+                    contentType and contentType == "application/octet-stream"):
+                logger.debug("This is an audio file content type!: " + contentType)
+                logger.debug("Downloading temp file")
+
+                with tempfile.NamedTemporaryFile() as temp:
+                    with open(temp.name, "wb") as file:
+                        while chunk := response.read(8192):
+                            file.write(chunk)
+
+                        temp.flush()
+
+                        logger.debug("Downloaded as temporary file: " + temp.name)
+                        logger.debug("Prompting FFProbe to probe audio file for validity")
+                        if ffprobe.is_valid_audio(temp.name):
+                            logger.debug(
+                                "FFProbe recognizes this file! Passing temporary file to FFmpeg to process into PCM")
+                            metadata = ffprobe.probe_metadata(temp.name)
+
+                            logger.debug(
+                                    "PCM data successfully output. Hashing URL into file name, then saving to cache")
+                            fileName = cachehelper.hash_name(url)
+                            cachehelper.save_metadata(SourceType.DIRECT, fileName, metadata)
+                            return metadata
+                        else:
+                            raise HTTPException(
+                                status_code=403,
+                                detail={
+                                    "service": "direct",
+                                    "error": "Invalid audio format per FFProbe!"
+                                }
+                            )
+            else:
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "service": "direct",
+                        "error": "Invalid Content-Type. Is this an audio?"
+                    }
+                )
+
+        except HTTPError as e:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "service": "direct",
+                    "error": "HTTP Error: " + str(e.code)
+                }
+            )
+        except URLError as e:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "service": "direct",
+                    "error": "URL Error: " + str(e.reason)
+                }
+            )
+        except InvalidURL as e:
+            raise HTTPException(
+                status_code=403,
+                detail={
+                    "service": "direct",
+                    "error": str(e)
+                }
+            )

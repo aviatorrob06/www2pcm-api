@@ -1,3 +1,4 @@
+import json
 import logging
 import subprocess
 
@@ -38,3 +39,44 @@ def is_valid_audio(path):
         return True
     else:
         return False
+
+def probe_metadata(filename):
+    result = subprocess.run(
+        [
+            FFPROBE_PATH,
+            "-v", "quiet",
+            "-print_format", "json",
+            "-show_format",
+            "-show_streams",
+            filename,
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+
+    data = json.loads(result.stdout)
+
+    format_data = data.get("format", {})
+    tags = format_data.get("tags", {})
+
+    metadata = {
+        key: value
+        for key, value in {
+            "title": tags.get("title"),
+            "artist": tags.get("artist"),
+            "album": tags.get("album"),
+            "album_artist": tags.get("album_artist"),
+            "genre": tags.get("genre"),
+            "date": tags.get("date"),
+            "track": tags.get("track"),
+            "disc": tags.get("disc"),
+            "duration": format_data.get("duration"),
+            "format": format_data.get("format_name"),
+            "bitrate": format_data.get("bit_rate"),
+        }.items()
+        if value is not None
+    }
+
+
+    return metadata

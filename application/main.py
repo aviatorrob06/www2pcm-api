@@ -26,6 +26,7 @@ async def lifespan(app: FastAPI):
     (CACHE_PATH / SourceType.BANDCAMP.value / "pcm").mkdir(parents=True, exist_ok=True)
     (CACHE_PATH / SourceType.BANDCAMP.value / "metadata").mkdir(parents=True, exist_ok=True)
     (CACHE_PATH / SourceType.DIRECT.value / "pcm").mkdir(parents=True, exist_ok=True)
+    (CACHE_PATH / SourceType.DIRECT.value / "metadata").mkdir(parents=True, exist_ok=True)
 
     print("Cache directories initialized")
 

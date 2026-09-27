@@ -23,7 +23,15 @@ FFMPEG_AUDIO_CHANNELS = "2"
 ```
 
 ## Deployment
-Installation script and instructions coming soon!
+This project is configured with a `pyproject.toml`, and it is recommended to have a virtual environment with its dependencies installed, setup, and configured through `uv`. 
+
+**PLEASE NOTE**, the only crucial part of installation that is not handled through `pyproject.toml` is the binary files (command line utilities) that are used in this web API. To ensure full control over these binaries, they must be downloaded and placed into `application/bin`, separate of the python project dependencies. 
+
+An automated script is available to be run in the install folder (`install_bin_script.py`), which will handle downloading and placing the latest versions of said binaries.
+
+As with any FastAPI application, you will need an ASGI (Asynchronous Server Gateway Interface) server to run this with. `Uvicorn` is recommended.
+
+If you anticipate large enough traffic, it is also recommended to run `Gunicorn` as a process manager, using `Uvicorn` workers. This allows multiple worker processes to run the application concurrently.
 
 ## API Usage
 ### Each service has its own endpoint:
@@ -46,6 +54,7 @@ For example:
 - /soundcloud/pcm?resource_path=ARTIST/TRACK
 - /youtube/metadata?video_id=VIDEO_ID_HERE
 - /spotify/pcm?track_id=TRACK_ID_HERE
+- /direct/pcm?url=https://incompetech.com/music/royalty-free/mp3-royaltyfree/The%20Britons.mp3
 ```
 ### As with any REST API...
 You go to the path of the method you want. For example, to get the PCM data of a YouTube video:
