@@ -1,7 +1,7 @@
 import json
 
 from fastapi import APIRouter, HTTPException
-from starlette.responses import Response
+from starlette.responses import Response, JSONResponse
 
 import application.services.spotdl
 from application.config import *
@@ -41,6 +41,36 @@ async def get_spotify_pcm(track_id: str):
                 cachehelper.save_ytlink(SourceType.SPOTIFY, track_id, video_id)
                 logger.debug("Successfully got and saved ytlink. Calling YouTube PCM endpoint.")
                 return await youtube.get_pcm(video_id)
+            except RuntimeError as e:
+                raise HTTPException(
+                    status_code=403,
+                    detail={
+                        "service": "SpotDL",
+                        "error": str(e)
+                    }
+                )
+
+
+@router.get("/metadata")
+async def get_spotify_metadata(track_id: str):
+        logger.debug(f"Attempting to get and return metadata for {track_id}. Checking ytlink cache")
+        try:
+            video_id = cachehelper.get_ytlink(SourceType.SPOTIFY, track_id)
+            try:
+                metadata = cachehelper.read_metadata(SourceType.YOUTUBE, video_id)
+                return JSONResponse(
+                    content=metadata
+                )
+            except FileNotFoundError:
+                logger.debug("Did NOT find cached metadata. Calling YouTube metadata endpoint.")
+                return await youtube.get_metadata(video_id)
+        except FileNotFoundError:
+            logger.debug("Did not find ytlink cache, running SpotDL")
+            try:
+                video_id = application.services.spotdl.get_yt_id(track_id)
+                cachehelper.save_ytlink(SourceType.SPOTIFY, track_id, video_id)
+                logger.debug("Successfully got and saved ytlink. Calling YouTube PCM endpoint.")
+                return await youtube.get_metadata(video_id)
             except RuntimeError as e:
                 raise HTTPException(
                     status_code=403,
