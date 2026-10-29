@@ -33,6 +33,8 @@ As with any FastAPI application, you will need an ASGI (Asynchronous Server Gate
 
 If you anticipate large enough traffic, it is also recommended to run `Gunicorn` as a process manager, using `Uvicorn` workers. This allows multiple worker processes to run the application concurrently.
 
+It is also encouraged to install and deploy `Redis` for consistent rate limiting across 'Gunicorn' workers.
+
 ## API Usage
 ### Each service has its own endpoint:
 ```
@@ -82,3 +84,5 @@ Used for YouTube sourcing
 Used for audio data conversion/formatting
 ### 5. [SpotDL](https://github.com/spotDL/spotify-downloader)
 Used for finding most similar YouTube video to provided Spotify track
+### 6. [SlowAPI](https://github.com/laurents/slowapi)
+Used for rate limiting
