@@ -85,7 +85,7 @@ latestVersionJson = latestVersionJsonResponse.json()
 latest_version = latestVersionJson["latest_version"]
 
 if str(thisVersion) != str(latest_version):
-    logging.warning("There is an update available!")
-    logging.warning(f"Current Version: {thisVersion}")
-    logging.warning(f"Latest Version: {latest_version}")
+    logger.warning("There is an update available!")
+    logger.warning(f"Current Version: {thisVersion}")
+    logger.warning(f"Latest Version: {latest_version}")
 

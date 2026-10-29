@@ -6,7 +6,7 @@ import sys
 def configLogger():
     logging.basicConfig(
         level=logging.DEBUG,
-        format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+        format="%(asctime)s | WWW2PCM-API %(levelname)s | %(name)s | %(message)s"
     )
 
 BASE_DIR = Path(__file__).parent
