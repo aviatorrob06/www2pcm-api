@@ -75,8 +75,17 @@ async def get_metadata(video_id: str):
         return metadata
     except FileNotFoundError:
         logger.debug("Did not find metadata in cache. Calling YTDLP.")
-        content = ytdlp.get_metadata(SourceType.YOUTUBE, video_id)
+        try:
+            content = ytdlp.get_metadata(SourceType.YOUTUBE, video_id)
 
-        return JSONResponse(
-            content=content
-        )
+            return JSONResponse(
+                content=content
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "service": "yt-dlp",
+                    "error": str(e)
+                }
+            )

@@ -79,8 +79,17 @@ async def get_metadata(resource_path: str):
         return metadata
     except FileNotFoundError:
         logger.debug("Did not find metadata in cache. Calling YTDLP.")
-        content = ytdlp.get_metadata(SourceType.BANDCAMP, resource_path)
+        try:
+            content = ytdlp.get_metadata(SourceType.BANDCAMP, resource_path)
 
-        return JSONResponse(
-            content=content
-        )
+            return JSONResponse(
+                content=content
+            )
+        except Exception as e:
+            raise HTTPException(
+                status_code=404,
+                detail={
+                    "service": "yt-dlp",
+                    "error": str(e)
+                }
+            )

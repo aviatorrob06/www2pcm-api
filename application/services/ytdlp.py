@@ -37,7 +37,7 @@ def get_metadata(sourceType: SourceType, video_id:str):
         check=True
     )
 
-    if (result.returncode != 0):
+    if result.returncode != 0:
         raise Exception(result.stderr)
 
     logger.debug("Subprocess success. Parsing results")
