@@ -8,11 +8,13 @@ from contextlib import asynccontextmanager
 from email import message
 
 from fastapi import FastAPI, HTTPException
+from starlette.requests import Request
 from starlette.responses import Response
 from uvicorn import lifespan
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
+from slowapi.middleware import SlowAPIMiddleware
 
 import application.config
 from application.config import FFMPEG_PATH, configLogger, CACHE_PATH, DIRECT_URL_ALLOWED
@@ -59,12 +61,18 @@ app.add_exception_handler(
     _rate_limit_exceeded_handler,
 )
 
+app.add_middleware(SlowAPIMiddleware)
+
 @app.get("/")
 async def root():
     return {"message": "www2pcm-api. Find documentation at https://github.com/aviatorrob06/www2pcm-api"}
 
 with open(Path(__file__).resolve().parent.parent / "pyproject.toml", "rb") as f:
     config = tomllib.load(f)
+
+@app.get("/rate-limit-test")
+async def rate_limit_test(request: Request):
+    return {"message": "Request successful"}
 
 thisVersion = config["project"]["version"]
 @app.get("/version")
