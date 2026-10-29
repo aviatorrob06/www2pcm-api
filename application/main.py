@@ -1,5 +1,9 @@
 import code
 import logging
+import tomllib
+from pathlib import Path
+
+import requests
 from contextlib import asynccontextmanager
 from email import message
 
@@ -59,9 +63,29 @@ app.add_exception_handler(
 async def root():
     return {"message": "www2pcm-api. Find documentation at https://github.com/aviatorrob06/www2pcm-api"}
 
+with open(Path(__file__).resolve().parent.parent / "pyproject.toml", "rb") as f:
+    config = tomllib.load(f)
+
+thisVersion = config["project"]["version"]
+@app.get("/version")
+async def getVersion():
+    return thisVersion
+
 app.include_router(youtube.router)
 app.include_router(spotify.router)
 app.include_router(soundcloud.router)
 app.include_router(bandcamp.router)
 app.include_router(direct.router)
+
+#Check latest version
+latestVersionJsonResponse = requests.get("https://raw.githubusercontent.com/aviatorrob06/www2pcm-api/refs/heads/master/LATEST_VERSION.json", timeout=10)
+latestVersionJsonResponse.raise_for_status()
+
+latestVersionJson = latestVersionJsonResponse.json()
+latest_version = latestVersionJson["latest_version"]
+
+if str(thisVersion) != str(latest_version):
+    logging.warning("There is an update available!")
+    logging.warning(f"Current Version: {thisVersion}")
+    logging.warning(f"Latest Version: {latest_version}")
 
