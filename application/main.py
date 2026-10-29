@@ -6,6 +6,9 @@ from email import message
 from fastapi import FastAPI, HTTPException
 from starlette.responses import Response
 from uvicorn import lifespan
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 import application.config
 from application.config import FFMPEG_PATH, configLogger, CACHE_PATH, DIRECT_URL_ALLOWED
@@ -39,6 +42,18 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 logger = logging.getLogger(__name__)
 configLogger()
+
+limiter = Limiter(
+    key_func=get_remote_address,
+    default_limits=["10/minute"],
+    storage_uri="redis://localhost:6379/0",
+)
+
+app.state.limiter = limiter
+app.add_exception_handler(
+    RateLimitExceeded,
+    _rate_limit_exceeded_handler,
+)
 
 @app.get("/")
 async def root():
